@@ -1,0 +1,30 @@
+TODO
+Implement timers
+Add checking
+Sort teams and distribute server info
+Use PMs instead of notices.
+Add in stats command
+Run !list after adding and removing
+Send a player list to captains.
+Show whos turn it is
+!picks to show current teams
+!stats <player>
+Ask someone about logs
+SRCDS integration
+Everything
+
+Commands:
+!captain
+!last
+!status
+!server
+!mumble
+!help
+!endgame
+!reaplce <captain> <newplayer>
+!status
+!top10
+!logs
+!stv
+
+Rework database, possibly use activerecord

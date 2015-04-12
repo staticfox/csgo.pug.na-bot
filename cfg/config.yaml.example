@@ -1,0 +1,59 @@
+database:
+  mysql:
+    host: localhost
+    user: csgopugbot
+    pass:
+    db: csgopugbot
+
+irc:
+  server: prothid.ca.us.gamesurge.net
+  bot_nick: pugbottest
+  ident: pugbottest
+  real_name: Beta IRC PUG Bot
+  auth_server: AuthServ@Services.GameSurge.net
+  nickserv_acc: csgo-pugbot
+  ns_pass: 
+  debug_chan: "#csgo.pug.na"
+  pug_chan: "#csgo.pug.na"
+  admin_host: blindsight.operator.support
+  bind_ip:
+
+bot:
+  debug: 1
+  games_for_reward: 10
+  captain_percentage: 50
+
+pug:
+  players_required: 10
+  captains_required: 2
+  afk_timeout: 45
+  draft_timeout: 45
+  idle_time: 600
+
+servers:
+  - name: BlindSight's Test Server
+    ip: 127.0.0.1
+    port: 27030
+    stv: 
+    rcon: test_rcon
+
+sponsor:
+  name: blindsight
+  url: http://blindsighttf2.com
+
+maps:
+  active_duty:
+    - name: dust2
+      file: de_dust2
+    - name: cobblestone
+      file: de_cbble
+    - name: inferno
+      file: de_inferno
+    - name: cache
+      file: de_cache
+    - name: overpass
+      file: de_overpass
+    - name: mirage
+      file: de_mirage
+    - name: train
+      file: de_train
