@@ -208,7 +208,6 @@ module SRCDS
             end
           end
         end
-        puts "ok usuable is #{usable}"
         if usable == 1
           @current_server = try_this
           return @current_server
@@ -232,9 +231,8 @@ module SRCDS
         end
       end
     elsif @dead_servers.include? @current_server
-      @servers = @servers - @current_server
+      @servers = @servers - @dead_servers
       @current_server = nil
-      find_not_full_server channel, nil, nil, nil
       have_any_left = @servers - @dead_servers
       if have_any_left.length.to_i == 0
         pm(channel, "0,1All available servers appear to be broken. Please contact a channel operator. In the mean time, I will assign a random server after drafts then you can figure it out from there", 1, nil)
@@ -322,9 +320,6 @@ module SRCDS
       gen_new_map
     end
 
-    puts "we should be setting the password to #{p} because the server is #{serversource} the map is #{@map['file']}"
-    puts "ip is #{serversource['ip']}, port is #{serversource['port']}, rcon is #{serversource['rcon']}"
-
     unless serversource.nil?
       begin
         server_ip = IPAddr.new(serversource['ip'])
@@ -337,7 +332,7 @@ module SRCDS
         sleep(1)
         server.rcon_exec("changelevel #{@map['file']}")
       rescue => e
-        puts "An error has occured: #{e} | #{e.backtrace}"
+        puts "An error has occured: #{e} | #{e.backtrace}" # This should debug to IRC
       end
     end
 

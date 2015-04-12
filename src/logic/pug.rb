@@ -303,11 +303,9 @@ module PugLogic
                 pm(channel, "0,1#{team_2_color}#{our_captain_name}0,1 has picked #{team_2_color}#{pick}0,1 for their team. #{team_1_color}#{other_captain}0,1 now picks.", 1, nil)
               end
               if pick_count(channel) == 10
-                puts "START HERE YES?? #{pick_count(channel)}"
                 pm(channel, "0,1Configuring server...", 1, nil)
                 start_game channel
               else
-                puts "Its not time yet: #{pick_count(channel)}"
                 pm(other_captain, "It's your turn to pick! Added players to choose from: #{fetch_players channel}", nil, nil)
               end
             end
@@ -320,9 +318,7 @@ module PugLogic
   end
 
   def start_game channel
-    puts "starting game!!!"
     server = find_not_full_server channel, nil, nil, nil
-    puts "server is #{server}"
     game_info = configure_server channel, server
     password = game_info[0]
     map_info = game_info[1]
@@ -366,7 +362,11 @@ module PugLogic
         team_string = team_string + " '" + x + "', "
       end
     }
-    $con.query("INSERT INTO `history` (`leader_1`,`player_2`,`player_3`,`player_4`,`player_5`,`leader_6`,`player_7`,`player_8`,`player_9`,`player_10`,`map`,`server`,`duration`,`who_won`,`date_started`) VALUES (#{team_string} '#{map_info}', '#{$con.escape_string(server['name'])}', NULL, NULL, '#{Time.new.to_i}')")
+    if server
+      $con.query("INSERT INTO `history` (`leader_1`,`player_2`,`player_3`,`player_4`,`player_5`,`leader_6`,`player_7`,`player_8`,`player_9`,`player_10`,`map`,`server`,`duration`,`who_won`,`date_started`) VALUES (#{team_string} '#{map_info}', '#{$con.escape_string(server['name'])}', NULL, NULL, '#{Time.new.to_i}')")
+    else
+      $con.query("INSERT INTO `history` (`leader_1`,`player_2`,`player_3`,`player_4`,`player_5`,`leader_6`,`player_7`,`player_8`,`player_9`,`player_10`,`map`,`server`,`duration`,`who_won`,`date_started`) VALUES (#{team_string} '#{map_info}', 'None.', NULL, NULL, '#{Time.new.to_i}')")
+    end
     c_players = $con.query("SELECT teams.player_id, teams.team_id, teams.captain, irc_players.nick 
       FROM `teams` 
       INNER JOIN irc_players ON teams.player_id = irc_players.player_id 
@@ -402,12 +402,15 @@ module PugLogic
     pm(channel, "0,1Final teams for this PUG:", 1, nil)
     pm(channel, "4,1Terrorists: #{team_a_array.join(", ")}", 1, nil)
     pm(channel, "11,1Counter-Terrorists: #{team_b_array.join(", ")}", 1, nil)
-    pm(channel, "0,1The pug will take place on #{server['name']} with map #{map_info.capitalize}", 1, nil)
+    if server.nil?
+      pm(channel, "0,1Unable to find an available server. :( The map is #{map_info.capitalize}", 1, nil)
+    else
+      pm(channel, "0,1The pug will take place on #{server['name']} with map #{map_info.capitalize}", 1, nil)
+    end
     if Constants.const['sponsor']['name']
       pm(channel, "9,1Servers are provided by 9,1#{Constants.const['sponsor']['name']}0,1. 7,1Visit their website at #{Constants.const['sponsor']['url']}", 1, nil)
     end
     gen_new_map
-    puts "It should start here!"
   end
 
   def need_logic channel, locked
