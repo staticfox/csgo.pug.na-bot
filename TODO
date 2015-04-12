@@ -1,28 +1,16 @@
 TODO
-Implement timers
-Add checking
-Sort teams and distribute server info
-Use PMs instead of notices.
-Add in stats command
-Run !list after adding and removing
-Send a player list to captains.
-Show whos turn it is
+Block users trying to add/remove that are restricted
+Add in timers for pruning old restrictions
+Add !why for restricted users (!why <nick> for admins, !why for users)
+Use notices for drafts
 !picks to show current teams
-!stats <player>
 Ask someone about logs
-SRCDS integration
-Everything
 
 Commands:
-!captain
-!last
-!status
-!server
 !mumble
 !help
 !endgame
 !reaplce <captain> <newplayer>
-!status
 !top10
 !logs
 !stv
