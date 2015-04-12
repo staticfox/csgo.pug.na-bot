@@ -1,3 +1,4 @@
+require 'chronic_duration'
 require 'date'
 
 require_relative '../bot'
@@ -435,17 +436,72 @@ module PugLogic
     end
   end
 
+  def authorize_player channel, player
+    restricted_nick = $con.escape_string(player)
+    player_id_query = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{restricted_nick}' LIMIT 1")
+    p_id = 0
+    while row = player_id_query.fetch_row do
+      p_id = row[0].to_i
+    end
+    if p_id != 0
+      is_restricted = $con.query("SELECT `player_id` FROM `restrictions` WHERE `player_id` = '#{p_id}'")
+      if is_restricted.num_rows > 0
+        $con.query("DELETE FROM `restrictions` WHERE `player_id` = '#{p_id}'")
+        return pm(channel, "0,1#{player} is no longer restricted", 1, nil)
+      else
+        return pm(channel, "0,1#{player} is not restricted", 1, nil)
+      end
+    else
+      return pm(channel, "0,1Could not find a player named #{nick}", 1, nil)
+    end
+  end
+
+  def restrict_player restrictor, restrictor_id, channel, baddie, time, message, captain_restrict
+    baddie_id = $con.escape_string(baddie.to_s)
+    pidq = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{baddie_id}' LIMIT 1")
+    baddies_id = 0
+    while row = pidq.fetch_row do
+      baddies_id = row[0].to_i
+    end
+    if baddies_id != 0
+      duration = ChronicDuration.parse(time)
+      return pm(channel, "0,1Could not parse duration of restriction", 1, nil) unless duration
+      is_restricted = $con.query("SELECT `restrictor_id`,`player_id`,`captain`,`time_restricted`,`unrestrict_at` FROM `restrictions` WHERE `player_id` = '#{baddies_id}'")
+      if is_restricted.num_rows > 0
+        already_captain = 0
+        while row = is_restricted.fetch_row do
+          already_captain = row[2].to_i
+        end
+        $con.query("UPDATE `restrictions` SET `restrictor_id` = '#{restrictor_id}', `time_restricted` = '#{Time.new.to_i}', `unrestrict_at` = '#{duration.to_i + Time.new.to_i}', `captain` = '#{captain_restrict}', `reason` = '#{message}' WHERE `player_id` = '#{baddies_id}' ")
+        if already_captain == 0 && captain_restrict == 1
+          return pm(channel, "0,1#{baddie} is now restricted from captaining for #{ChronicDuration.output(duration)}", 1, nil)
+        else
+          return pm(channel, "0,1Updating #{baddie}'s restriction, #{baddie} is now restricted for #{ChronicDuration.output(duration)}", 1, nil)
+        end
+      else
+        $con.query("INSERT INTO `restrictions` (`restrictor_id`,`player_id`,`captain`,`time_restricted`,`unrestrict_at`,`reason`) VALUES ('#{restrictor_id}', '#{baddies_id}', '#{captain_restrict}', '#{Time.new.to_i}', '#{duration.to_i + Time.new.to_i}', '#{message}')")
+        if captain_restrict == 1
+          return pm(channel, "0,1Restricted #{baddie} from captaining for #{ChronicDuration.output(duration)}", 1, nil)
+        else
+          return pm(channel, "0,1Restricted #{baddie} from playing for #{ChronicDuration.output(duration)}", 1, nil)
+        end
+      end
+    else
+      return pm(channel, "0,1Could not find a player named #{nick}", 1, nil)
+    end
+  end
+
   def last_logic channel
     data = $con.query("SELECT `date_started` FROM `history` ORDER BY `match_id` DESC LIMIT 1")
     if data.num_rows == 0
-      pm(channel, "0,1A match has yet to be started.", 1, nil)
+      pm(channel, "0,1A match has yet to be started", 1, nil)
     else
       dt = 0
       while row = data.fetch_row do
         dt = row[0].to_i
       end
       formated = DateTime.strptime(dt.to_s, '%s')
-      pm(channel, "0,1The last match was started at #{formated}", 1, nil)
+      pm(channel, "0,1The last match was started at #{formated}", 1, nil)
     end
   end
 

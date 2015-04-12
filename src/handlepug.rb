@@ -53,7 +53,9 @@ class Pug
   match /wipetables/i, method: :command_wipe
 
   # Admin commands
+  match /authorize ([\S]+)/i, method: :command_authorize
   match /restrict ([\S]+) ([\S]+)(?: (.+))?/i, method: :command_restrict
+  match /crestrict ([\S]+) ([\S]+)(?: (.+))?/i, method: :command_crestrict
   match /quit/i, method: :command_quit
 
   # Channel ticks
@@ -185,12 +187,36 @@ class Pug
     ping_mysql
   end
 
+  def command_authorize m, p_restricted
+    channel = escape m.channel.to_s
+    return m.reply "0,1You must be a channel op to use this command." unless m.channel.opped? m.user
+    authorize_player channel, p_restricted
+  end
+
   def command_restrict m, p_restricted, time, message
     restrictor = escape m.user.nick
     restrictor_id = get_uid m
-    channel = escape m.user.nick
+    channel = escape m.channel.to_s
     return m.reply "0,1You must be a channel op to use this command." unless m.channel.opped? m.user
+    if message
+      message = escape message
+    else
+      message = "No reason specified"
+    end
     restrict_player restrictor, restrictor_id, channel, p_restricted, time, message, 0
+  end
+
+  def command_crestrict m, p_restricted, time, message
+    restrictor = escape m.user.nick
+    restrictor_id = get_uid m
+    channel = escape m.channel.to_s
+    return m.reply "0,1You must be a channel op to use this command." unless m.channel.opped? m.user
+    if message
+      message = escape message
+    else
+      message = "No reason specified"
+    end
+    restrict_player restrictor, restrictor_id, channel, p_restricted, time, message, 1
   end
 
   # Debugging purposes, this will screw up your DB
