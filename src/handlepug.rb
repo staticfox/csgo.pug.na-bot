@@ -29,6 +29,7 @@ class Pug
   listen_to :nick, method: :event_nick
 
   timer 90, method: :mysql_keepalive
+  timer 15, method: :timed_restrictions
 
   # Player commands
   match /add(?: (.+))?/i, method: :command_add
@@ -217,6 +218,11 @@ class Pug
       message = "No reason specified"
     end
     restrict_player restrictor, restrictor_id, channel, p_restricted, time, message, 1
+  end
+
+  # Check for restrictions
+  def timed_restrictions
+    prune_restrictions
   end
 
   # Debugging purposes, this will screw up your DB

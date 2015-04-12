@@ -57,7 +57,7 @@ module InteralCalc
       if data.num_rows > 0 # Subtract from our standard list
         while row = data.fetch_row do
           if Time.new.to_i - row[1].to_i >= idle_time
-            afk_users.push(row[0])
+            afk_users << row[0]
           else
             $con.query("UPDATE `current_players` SET `idle_time` = '#{Time.new.to_i}' WHERE `player_id` = '#{row[3]}'") # We do this so we don't have any spam issues with re-checks
           end
@@ -150,7 +150,7 @@ module InteralCalc
         intteam = 1
         captains_array = []
         while row = captains.fetch_row do
-          captains_array.push(row[1])
+          captains_array << row[1]
           $con.query("INSERT INTO `teams` (`player_id`,`team_id`,`captain`,`channel`,`picked_when`) VALUES ('#{row[0]}', '#{intteam}', '1', '#{channel}', '#{Time.new.to_i}')")
           $con.query("DELETE FROM `current_players` WHERE `player_id` = '#{row[0]}'")
           intteam += 1
@@ -179,6 +179,29 @@ module InteralCalc
     end
     string = string[0...-2] + "."
     return string
+  end
+
+  def prune_restrictions
+    now = Time.new.to_i
+    old_res = $con.query("SELECT restrictions.player_id, irc_players.nick, restrictions.unrestrict_at 
+      FROM restrictions 
+      INNER JOIN irc_players ON restrictions.player_id = irc_players.player_id")
+    if old_res.num_rows > 0
+      ids = []
+      names = []
+      times = []
+      while row = old_res.fetch_row do
+        ids << row[0].to_i
+        names << row[1].to_s
+        times << row[2].to_i
+      end
+      ids.zip(names,times) do |id,name,time|
+        if time <= now
+          $con.query("DELETE FROM `restrictions` WHERE `player_id` = '#{id}'")
+          pm(Constants.const['irc']['pug_chan'].to_s, "0,1#{name} is no longer restricted.", 1, nil)
+        end
+      end
+    end
   end
 
   def pm target, message, chan, notice

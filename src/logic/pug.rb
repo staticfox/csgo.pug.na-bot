@@ -338,16 +338,16 @@ module PugLogic
           team_a_array.unshift(row[0])
           team_a_id.unshift(row[2])
         else
-          team_a_array.push(row[0])
-          team_a_id.push(row[2])
+          team_a_array << row[0]
+          team_a_id << row[2]
         end
       else
         if row[1].to_i == 1
           team_b_array.unshift(row[0])
           team_b_id.unshift(row[2])
         else
-          team_b_array.push(row[0])
-          team_b_id.push(row[2])
+          team_b_array << row[0]
+          team_b_id << row[2]
         end
       end
       int += 1
