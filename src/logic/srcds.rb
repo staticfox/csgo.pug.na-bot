@@ -119,15 +119,17 @@ module SRCDS
           get_server channel, tried, @dead_servers
         end
       end
-    elsif deadservers.include? @current_server
-      have_any_left = @servers - @dead_servers
-      if have_any_left.length.to_i == 0
-        pm(channel, "0,1All available servers appear to be broken. Please contact a channel operator. In the mean time, I will assign a random server after drafts then you can figure it out from there", 1, nil)
-        @current_server = @servers.shuffle.first
-      else
-        @servers = @servers - @dead_servers
-        @current_server = nil
-        get_server channel, 0, @dead_servers
+    elsif deadservers
+      if deadservers.include? @current_server
+        have_any_left = @servers - @dead_servers
+        if have_any_left.length.to_i == 0
+          pm(channel, "0,1All available servers appear to be broken. Please contact a channel operator. In the mean time, I will assign a random server after drafts then you can figure it out from there", 1, nil)
+          @current_server = @servers.shuffle.first
+        else
+          @servers = @servers - @dead_servers
+          @current_server = nil
+          get_server channel, 0, @dead_servers
+        end
       end
     else
       server_ip = IPAddr.new(@current_server['ip'])
