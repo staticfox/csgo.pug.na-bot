@@ -45,6 +45,7 @@ class Pug
   match /server/i, method: :command_server
   match /stats(?: (.+))?/i, method: :command_stats
   match /status/i, method: :command_status
+  match /why(?: (.+))?/i, method: :command_why
 
   # Captain commands
   match /pick ([\S]+)/i, method: :command_pick
@@ -183,6 +184,15 @@ class Pug
   def command_status m
     channel = escape m.channel.to_s
     get_status channel #logic/srcds
+  end
+
+  # Should this be an admin command?
+  def command_why m, player
+    channel = m.channel.to_s
+    player = escape player.to_s
+    ourself = escape m.user.nick.to_s
+    our_id = get_uid m
+    why_logic channel, player, ourself, our_id
   end
 
   # Keep MySQL connection alive

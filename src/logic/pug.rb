@@ -534,6 +534,55 @@ module PugLogic
     end
   end
 
+  def why_logic channel, nick, ourself, ourid
+    baddies_id = playerid_by_nick nick
+    if baddies_id != 0
+      is_restricted = $con.query("SELECT irc_players.nick, restrictions.captain, restrictions.time_restricted, restrictions.unrestrict_at 
+        FROM restrictions 
+        INNER JOIN irc_players ON restrictions.restrictor_id = irc_players.player_id 
+        WHERE restrictions.player_id = '#{baddies_id}'")
+      if is_restricted.num_rows > 0
+        restrictor = ""
+        captain = time_restricted = unrestrict_at = 0
+        while row = is_restricted.fetch_row do
+          restrictor = row[0].to_s
+          captain = row[1].to_i
+          time_restricted = row[2].to_i
+          unrestrict_at = row[3].to_i
+        end
+        if captain == 1
+          return pm(channel, "0,1#{nick} was captain restricted by #{restrictor} on #{Time.at(time_restricted)} and will be unrestricted at #{Time.at(unrestrict_at)}", 1, nil)
+        else
+          return pm(channel, "0,1#{nick} was restricted by #{restrictor} on #{Time.at(time_restricted)} and will be unrestricted at #{Time.at(unrestrict_at)}", 1, nil)
+        end
+      else
+        return pm(channel, "0,1#{nick} is not restricted.", 1, nil)
+      end
+    else
+      is_restricted = $con.query("SELECT irc_players.nick, restrictions.captain, restrictions.time_restricted, restrictions.unrestrict_at 
+        FROM restrictions 
+        INNER JOIN irc_players ON restrictions.restrictor_id = irc_players.player_id 
+        WHERE restrictions.player_id = '#{ourid}'")
+      if is_restricted.num_rows > 0
+        restrictor = ""
+        captain = time_restricted = unrestrict_at = 0
+        while row = is_restricted.fetch_row do
+          restrictor = row[0].to_s
+          captain = row[1].to_i
+          time_restricted = row[2].to_i
+          unrestrict_at = row[3].to_i
+        end
+        if captain == 1
+          return pm(channel, "0,1#{ourself} was captain restricted by #{restrictor} on #{Time.at(time_restricted)} and will be unrestricted at #{Time.at(unrestrict_at)}", 1, nil)
+        else
+          return pm(channel, "0,1#{ourself} was restricted by #{restrictor} on #{Time.at(time_restricted)} and will be unrestricted at #{Time.at(unrestrict_at)}", 1, nil)
+        end
+      else
+        return pm(channel, "0,1#{ourself} is not restricted.", 1, nil)
+      end
+    end
+  end
+
   def playerid_by_nick nick
     nick = escape nick.to_s
     pidq = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{nick}' LIMIT 1")
