@@ -60,6 +60,7 @@ class Pug
   match /crestrict ([\S]+) ([\S]+)(?: (.+))?/i, method: :admin_crestrict
   match /fadd ([\S]+)(?: (.+))?/i, method: :admin_fadd
   match /fremove ([\S]+)/i, method: :admin_fremove
+  match /nextmap/i, method: :admin_nextmap
   match /restrict ([\S]+) ([\S]+)(?: (.+))?/i, method: :admin_restrict
   match /quit/i, method: :admin_quit
 
@@ -252,6 +253,12 @@ class Pug
     channel = escape m.channel.to_s
     admin = escape m.user.nick.to_s
     fremove_logic channel, player, admin
+  end
+
+  def admin_nextmap m
+    return m.reply "0,1You must be a channel op to use this command." unless m.channel.opped? m.user
+    channel = escape m.channel.to_s
+    nextmap_logic channel #logic/srcds
   end
 
   # Debugging purposes, this will screw up your DB

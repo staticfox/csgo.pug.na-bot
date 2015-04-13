@@ -55,6 +55,11 @@ module SRCDS
     end
   end
 
+  def nextmap_logic channel
+    gen_new_map
+    return pm(channel, "0,1The map is now #{@map['name'].capitalize}", 1, nil)
+  end
+
   # This seems sorta awkward
   def get_map_list channel
     maps = Constants.const['maps']['active_duty']
