@@ -1,4 +1,8 @@
+require_relative 'database'
+
 module IRCHandler
+
+  include DB
 
   def update_idle uid
     $con.query("UPDATE `current_players` SET `idle_time` = '#{Time.new.to_i}' WHERE `player_id` = '#{uid}'")
@@ -31,7 +35,7 @@ module IRCHandler
   end
 
   def has_uid nick
-    nick = $con.escape_string(nick.to_s.to_s)
+    nick = escape nick.to_s
     # Let's get their player ID first.
     pidq = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{nick}' LIMIT 1")
 
@@ -43,7 +47,7 @@ module IRCHandler
   end
 
   def get_uid m
-    nick = $con.escape_string(m.user.nick.to_s)
+    nick = escape m.user.nick.to_s
     pidq = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{nick}' LIMIT 1")
     playerid = 0
     while row = pidq.fetch_row do
@@ -51,10 +55,10 @@ module IRCHandler
     end
 
     if playerid == 0
-      authname = $con.escape_string(m.user.authname.to_s)
-      ident = $con.escape_string(m.user.user.to_s)
-      host = $con.escape_string(m.user.host.to_s)
-      real = $con.escape_string(m.user.realname.to_s)
+      authname = escape m.user.authname.to_s
+      ident = escape m.user.user.to_s
+      host = escape m.user.host.to_s
+      real = escape m.user.realname.to_s
       $con.query("INSERT INTO `irc_players` (`authname`,`nick`,`ident`,`host`,`gecos`,`last_appearance`) VALUES ('#{authname}', '#{nick}', '#{ident}', '#{host}', '#{real}', '#{Time.new.to_i}')")
       pidq = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{nick}' LIMIT 1")
       playerid = 0

@@ -3,11 +3,13 @@ require 'date'
 
 require_relative '../bot'
 require_relative '../constants'
+require_relative 'database'
 require_relative 'srcds'
 
 module PugLogic
 
   include Const
+  include DB
   include SRCDS
 
   def quit_bot
@@ -105,7 +107,7 @@ module PugLogic
 
   def get_stats ouruid, ournick, theirplayer, channel
     if theirplayer
-      nick = $con.escape_string(theirplayer)
+      nick = escape theirplayer
       pidq = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{nick}' LIMIT 1")
       theirid = 0
       while row = pidq.fetch_row do
@@ -251,7 +253,7 @@ module PugLogic
       else
 
         # Find the UID of our target
-        pick = $con.escape_string(pick)
+        pick = escape pick
         find_pick_uid_query = $con.query("SELECT player_id FROM irc_players WHERE `nick` = '#{pick}'")
         if find_pick_uid_query.num_rows > 0
           pick_id = 0
@@ -363,7 +365,7 @@ module PugLogic
       end
     }
     if server
-      $con.query("INSERT INTO `history` (`leader_1`,`player_2`,`player_3`,`player_4`,`player_5`,`leader_6`,`player_7`,`player_8`,`player_9`,`player_10`,`map`,`server`,`duration`,`who_won`,`date_started`) VALUES (#{team_string} '#{map_info}', '#{$con.escape_string(server['name'])}', NULL, NULL, '#{Time.new.to_i}')")
+      $con.query("INSERT INTO `history` (`leader_1`,`player_2`,`player_3`,`player_4`,`player_5`,`leader_6`,`player_7`,`player_8`,`player_9`,`player_10`,`map`,`server`,`duration`,`who_won`,`date_started`) VALUES (#{team_string} '#{map_info}', '#{escape server['name']}', NULL, NULL, '#{Time.new.to_i}')")
     else
       $con.query("INSERT INTO `history` (`leader_1`,`player_2`,`player_3`,`player_4`,`player_5`,`leader_6`,`player_7`,`player_8`,`player_9`,`player_10`,`map`,`server`,`duration`,`who_won`,`date_started`) VALUES (#{team_string} '#{map_info}', 'None.', NULL, NULL, '#{Time.new.to_i}')")
     end
@@ -501,7 +503,7 @@ module PugLogic
   end
 
   def authorize_player channel, player
-    restricted_nick = $con.escape_string(player)
+    restricted_nick = escape player
     player_id_query = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{restricted_nick}' LIMIT 1")
     p_id = 0
     while row = player_id_query.fetch_row do
@@ -521,7 +523,7 @@ module PugLogic
   end
 
   def restrict_player restrictor, restrictor_id, channel, baddie, time, message, captain_restrict
-    baddie_id = $con.escape_string(baddie.to_s)
+    baddie_id = escape baddie.to_s
     pidq = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{baddie_id}' LIMIT 1")
     baddies_id = 0
     while row = pidq.fetch_row do

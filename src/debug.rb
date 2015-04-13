@@ -1,6 +1,9 @@
 require_relative 'bot'
+require_relative 'logic/database'
 
 module Debug
+
+  include DB
 
   def debug_start(channel, players)
     begin
@@ -8,7 +11,7 @@ module Debug
     rescue
       BotManager.cmsg(channel, "Players must be an integer!")
     end
-    channel = $con.escape_string(channel.to_s)
+    channel = escape channel.to_s
     fv = $con.query("SELECT COUNT(*) FROM `irc_players` WHERE `nick` LIKE '%playerbotdebug%'")
     vc = 0
     if fv.num_rows > 0

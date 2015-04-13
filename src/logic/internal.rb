@@ -1,7 +1,10 @@
 require_relative '../bot'
 require_relative '../constants'
+require_relative 'database'
 
 module InteralCalc
+
+  include DB
 
   def ready_to_start channel, afk_timeout, start_timeout, players, captains, idle_time
     data = $con.query("SELECT
@@ -27,7 +30,7 @@ module InteralCalc
   end
 
   def afk_check channel, afk_timeout, start_timeout, idle_time
-    channel = $con.escape_string(channel.to_s)
+    channel = escape channel.to_s
     init = $con.query("SELECT `timeout_start_at`,`afk_check` FROM `pug_status` WHERE `channel` = '#{channel}'")
     timeout = nil
     afk = nil
