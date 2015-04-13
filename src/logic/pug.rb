@@ -123,7 +123,7 @@ module PugLogic
             captain = row[1].to_i
           end
           percentage = (((captain.to_f/total.to_f))*100)
-          return pm(channel, "0,1 #{theirplayer} has played #{total} game(s) and has captained #{captain} time(s). (#{percentage}% captain ratio)", 1, nil)
+          return pm(channel, "0,1 #{theirplayer} has played #{total} game(s) and has captained #{captain} time(s). (#{percentage.round(2)}% captain ratio)", 1, nil)
         else
           return pm(channel, "0,1 #{theirplayer} has not played any games.", 1, nil)
         end
@@ -139,7 +139,7 @@ module PugLogic
           captain = row[1].to_i
         end
         percentage = (((captain.to_f/total.to_f))*100)
-        return pm(channel, "0,1 #{ournick} has played #{total} game(s) and has captained #{captain} time(s). (#{percentage}% captain ratio)", 1, nil)
+        return pm(channel, "0,1 #{ournick} has played #{total} game(s) and has captained #{captain} time(s). (#{percentage.round(2)}% captain ratio)", 1, nil)
       else
         return pm(channel, "0,1 #{nournickick} has not played any games.", 1, nil)
       end
@@ -159,7 +159,7 @@ module PugLogic
         if percentage >= Constants.const['bot']['captain_percentage'].to_i
           BotManager.voiceuser channel, nick
         else
-          return pm(channel, "0,1You must have a #{Constants.const['bot']['captain_percentage']}% captain ratio to receive voice (You have a #{percentage}% ratio)", 1, nil)
+          return pm(channel, "0,1You must have a #{Constants.const['bot']['captain_percentage']}% captain ratio to receive voice (You have a #{percentage.round(2)}% ratio)", 1, nil)
         end
       else
         return pm(channel, "0,1You must have at least #{Constants.const['bot']['games_for_reward']} games to qualify for voice", 1, nil)
