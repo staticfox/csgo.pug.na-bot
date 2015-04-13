@@ -193,9 +193,7 @@ module SRCDS
     if @servers.nil?
       @servers = []
       srvrs = Constants.const['servers']
-      srvrs.each { |x|
-        @servers.push(x)
-      }
+      srvrs.each { |x| @servers.push(x) }
     end
     if @current_server.nil? && !@servers.empty?
       try_this = @servers.shuffle.first
