@@ -388,10 +388,10 @@ module PugLogic
         else
           team_type = "counter-terrorists"
         end
-        if server.nil?
-          pm(row[3], "You have been picked on #{leader_name}'s team. You will be starting off as #{team_type} on map #{map_info}. I could not find an available server, so you will need to figure it out in mumble. :(", nil, nil)
-        else
+        if server
           pm(row[3], "You have been picked on #{leader_name}'s team. You will be starting off as #{team_type} on map #{map_info}. Server information: connect #{server['ip']}:#{server['port']}; password #{password}", nil, nil)
+        else
+          pm(row[3], "You have been picked on #{leader_name}'s team. You will be starting off as #{team_type} on map #{map_info}. I could not find an available server, so you will need to figure it out in mumble. :(", nil, nil)
         end
       end
     end
