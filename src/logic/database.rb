@@ -5,7 +5,7 @@ module DB
   end
 
   def ping_mysql
-  	$con.ping
+    $con.ping
   end
 
 end
