@@ -563,9 +563,9 @@ module PugLogic
         notes = row[4].to_s
       end
       if captain == 1
-        return pm(channel, "0,1#{baddiesnick} was captain restricted by #{restrictor} on #{Time.at(time_restricted)} and will be unrestricted at #{Time.at(unrestrict_at)}. Admin note: #{notes}", 1, nil)
+        return pm(channel, "0,1#{baddiesnick} was captain restricted by #{restrictor} on #{Time.at(time_restricted)} and will be unrestricted in #{ChronicDuration.output(unrestrict_at - Time.new.to_i)}. Admin note: #{notes}", 1, nil)
       else
-        return pm(channel, "0,1#{baddiesnick} was restricted by #{restrictor} on #{Time.at(time_restricted)} and will be unrestricted at #{Time.at(unrestrict_at)}. Admin note: #{notes}", 1, nil)
+        return pm(channel, "0,1#{baddiesnick} was restricted by #{restrictor} on #{Time.at(time_restricted)} and will be unrestricted in #{ChronicDuration.output(unrestrict_at - Time.new.to_i)}. Admin note: #{notes}", 1, nil)
       end
     else
       return pm(channel, "0,1#{baddiesnick} is not restricted.", 1, nil)
