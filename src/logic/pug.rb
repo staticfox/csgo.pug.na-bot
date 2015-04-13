@@ -40,7 +40,7 @@ module PugLogic
           full_list = full_list + row[0].to_s + is_captain + ", "
         end
       end
-      pm(channel, full_list[0...-2] + ".", 1, nil) # Trim it to make it look pretty
+      pm(channel, full_list[0...-2] + ".", 1, nil) # Trim it to make it look pretty
     else
       pm(channel, "0,1No players added, currently.", 1, nil) # No players :(
     end
