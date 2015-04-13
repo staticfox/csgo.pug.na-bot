@@ -602,8 +602,7 @@ module PugLogic
       while row = data.fetch_row do
         dt = row[0].to_i
       end
-      formated = DateTime.strptime(dt.to_s, '%s')
-      pm(channel, "0,1The last match was started at #{formated}", 1, nil)
+      pm(channel, "0,1The last match was started at #{ChronicDuration.output(Time.new.to_i - dt)}", 1, nil)
     end
   end
 
