@@ -5,13 +5,12 @@ module Debug
 
   include DB
 
-  def debug_start(channel, players)
+  def debug_start channel, players
     begin
       players = players.to_i
     rescue
-      BotManager.cmsg(channel, "Players must be an integer!")
+      return BotManager.cmsg(channel, "Players must be an integer!")
     end
-    channel = escape channel.to_s
     fv = $con.query("SELECT COUNT(*) FROM `irc_players` WHERE `nick` LIKE '%playerbotdebug%'")
     vc = 0
     if fv.num_rows > 0
@@ -31,6 +30,20 @@ module Debug
       i += 1
     end
     BotManager.cmsg(channel, "Added #{players} pseudo players.")
+  end
+
+  def debug_finish channel
+    pseudo_players_query = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` LIKE '%playerbotdebug%'")
+    if pseudo_players_query.num_rows > 0
+      while row = pseudo_players_query.fetch_row do
+        $con.query("DELETE FROM `current_players` WHERE `player_id` = '#{row[0]}'")
+        $con.query("DELETE FROM `teams` WHERE `player_id` = '#{row[0]}'")
+        $con.query("DELETE FROM `irc_players` WHERE `player_id` = '#{row[0]}'")
+      end
+      return BotManager.cmsg(channel, "Removed all pseudo players.")
+    else
+      return BotManager.cmsg(channel, "Could not find any pseudo players.")
+    end
   end
 
 end

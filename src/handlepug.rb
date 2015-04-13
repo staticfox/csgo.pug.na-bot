@@ -52,6 +52,7 @@ class Pug
 
   # Debug commands
   match /debug ([\S]+)/i, method: :admin_debug
+  match /debugoff/i, method: :admin_debugoff
   match /wipetables/i, method: :admin_wipe
 
   # Admin commands
@@ -259,6 +260,13 @@ class Pug
     return m.reply "0,1You must be a channel op to use this command." unless m.channel.opped? m.user
     channel = escape m.channel.to_s
     debug_start channel, num #debug
+  end
+
+  def admin_debugoff m
+    return m.reply "0,1Debugging mode must be enabled." unless Constants.const['bot']['debug'].to_i == 1
+    return m.reply "0,1You must be a channel op to use this command." unless m.channel.opped? m.user
+    channel = escape m.channel.to_s
+    debug_finish channel #debug
   end
 
   # Kill the bot
