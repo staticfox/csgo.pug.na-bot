@@ -22,3 +22,5 @@ Make a decision on wether or not to keep specifying channels for queries (half t
 Localize colors
 
 Add in a colorless mode
+
+Localize common phrases in to a localization file
