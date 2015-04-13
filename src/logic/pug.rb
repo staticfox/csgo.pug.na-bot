@@ -107,12 +107,7 @@ module PugLogic
 
   def get_stats ouruid, ournick, theirplayer, channel
     if theirplayer
-      nick = escape theirplayer
-      pidq = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{nick}' LIMIT 1")
-      theirid = 0
-      while row = pidq.fetch_row do
-        theirid = row[0].to_i
-      end
+      theirid = playerid_by_nick theirplayer
       if theirid != 0
         has_stats = $con.query("SELECT `times_played`,`times_captained` FROM `player_stats` WHERE `player_id` = '#{theirid}'")
         if has_stats.num_rows > 0
@@ -122,12 +117,12 @@ module PugLogic
             captain = row[1].to_i
           end
           percentage = (((captain.to_f/total.to_f))*100)
-          return pm(channel, "0,1 #{nick} has played #{total} game(s) and has captained #{captain} time(s). (#{percentage}% captain ratio)", 1, nil)
+          return pm(channel, "0,1 #{theirplayer} has played #{total} game(s) and has captained #{captain} time(s). (#{percentage}% captain ratio)", 1, nil)
         else
-          return pm(channel, "0,1 #{nick} has not played any games.", 1, nil)
+          return pm(channel, "0,1 #{theirplayer} has not played any games.", 1, nil)
         end
       else
-        return pm(channel, "0,1 Could not find a player named #{nick}.", 1, nil)
+        return pm(channel, "0,1 Could not find a player named #{theirplayer}.", 1, nil)
       end
     else
       find_stats = $con.query("SELECT `times_played`,`times_captained` FROM `player_stats` WHERE `player_id` = '#{ouruid}'")
@@ -253,13 +248,8 @@ module PugLogic
       else
 
         # Find the UID of our target
-        pick = escape pick
-        find_pick_uid_query = $con.query("SELECT player_id FROM irc_players WHERE `nick` = '#{pick}'")
-        if find_pick_uid_query.num_rows > 0
-          pick_id = 0
-          while row = find_pick_uid_query.fetch_row do
-            pick_id = row[0].to_i
-          end
+        pick_id = pick
+        if pick_id != 0
 
           is_added = $con.query("SELECT `player_id`,`captain` FROM `teams` WHERE `player_id` = '#{pick_id}' AND `channel` = '#{channel}'")
 
@@ -444,10 +434,7 @@ module PugLogic
   def fadd_logic channel, player, captain, admin
     player_query  = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{player}' LIMIT 1")
     if player_query.num_rows > 0
-      player_id = 0
-      while row = player_query.fetch_row do
-        player_id = row[0].to_i
-      end
+      player_id = playerid_by_nick player
 
       captaining = 0
       if captain
@@ -503,12 +490,7 @@ module PugLogic
   end
 
   def authorize_player channel, player
-    restricted_nick = escape player
-    player_id_query = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{restricted_nick}' LIMIT 1")
-    p_id = 0
-    while row = player_id_query.fetch_row do
-      p_id = row[0].to_i
-    end
+    p_id = playerid_by_nick player
     if p_id != 0
       is_restricted = $con.query("SELECT `player_id` FROM `restrictions` WHERE `player_id` = '#{p_id}'")
       if is_restricted.num_rows > 0
@@ -523,12 +505,7 @@ module PugLogic
   end
 
   def restrict_player restrictor, restrictor_id, channel, baddie, time, message, captain_restrict
-    baddie_id = escape baddie.to_s
-    pidq = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{baddie_id}' LIMIT 1")
-    baddies_id = 0
-    while row = pidq.fetch_row do
-      baddies_id = row[0].to_i
-    end
+    baddies_id = playerid_by_nick baddie
     if baddies_id != 0
       duration = ChronicDuration.parse(time)
       return pm(channel, "0,1Could not parse duration of restriction", 1, nil) unless duration
@@ -555,6 +532,16 @@ module PugLogic
     else
       return pm(channel, "0,1Could not find a player named #{nick}", 1, nil)
     end
+  end
+
+  def playerid_by_nick nick
+    nick = escape nick.to_s
+    pidq = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{nick}' LIMIT 1")
+    theirid = 0
+    while row = pidq.fetch_row do
+      theirid = row[0].to_i
+    end
+    return theirid
   end
 
   def last_logic channel
