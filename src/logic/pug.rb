@@ -48,7 +48,7 @@ module PugLogic
 
   def add_logic channel, playerid, nick, possible_capt, locked
     if locked == 0
-      captain = 0
+      captain = count = 0
       if possible_capt
         posar = possible_capt.split(" ")
         if posar.include?("captain")
@@ -56,9 +56,15 @@ module PugLogic
         end
       end
 
+      is_res = is_restricted playerid
+      if is_res == 2 && captain == 1
+        return pm(channel, "0,1#{nick}, you are currently restricted from captaining. Use !why to learn more.", 1, nil)
+      elsif is_res == 1
+        return pm(channel, "0,1#{nick}, you are currently restricted from playing. Use !why to learn more.", 1, nil)
+      end
+
       # Now let's see if we are already added
       addcheckq = $con.query("SELECT COUNT(`id`) FROM `current_players` WHERE `player_id` = '#{playerid}' AND `channel` = '#{channel}'")
-      count = 0
       while row = addcheckq.fetch_row do
         count = row[0].to_i
       end
@@ -581,6 +587,17 @@ module PugLogic
         return pm(channel, "0,1#{ourself} is not restricted.", 1, nil)
       end
     end
+  end
+
+  def is_restricted uid
+    find_restriction = $con.query("SELECT `captain` FROM `restrictions` WHERE `player_id` = '#{uid}'")
+    res = 0
+    if find_restriction.num_rows > 0
+      while row = find_restriction.fetch_row do
+        row[0].to_i == 1 ? res = 2 : res = 1
+      end
+    end
+    return res
   end
 
   def playerid_by_nick nick
