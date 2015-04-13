@@ -439,6 +439,67 @@ module PugLogic
     end
   end
 
+  def fadd_logic channel, player, captain, admin
+    player_query  = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{player}' LIMIT 1")
+    if player_query.num_rows > 0
+      player_id = 0
+      while row = player_query.fetch_row do
+        player_id = row[0].to_i
+      end
+
+      captaining = 0
+      if captain
+        posar = captain.split(" ")
+        if posar.include?("captain")
+          captaining = 1
+        end
+      end
+
+      addcheckq = $con.query("SELECT COUNT(`id`) FROM `current_players` WHERE `player_id` = '#{player_id}' AND `channel` = '#{channel}'")
+      count = 0
+      while row = addcheckq.fetch_row do
+        count = row[0].to_i
+      end
+
+      if count == 0
+        # We haven't added yet, so make a fresh entry
+        $con.query("INSERT INTO `current_players` (`player_id`,`channel`,`captain`,`idle_time`) VALUES ('#{player_id}', '#{channel}', '#{captain}', '#{Time.new.to_i}')")
+        get_list channel
+      else
+        # We are already listed, so go ahead and update our status.
+        $con.query("UPDATE `current_players` SET `captain` = '#{captain}', `idle_time` = '#{Time.new.to_i}' WHERE `player_id` = '#{player_id}'")
+        get_list channel
+      end
+      pm(channel, "0,1#{admin} force added #{player} to the pug", 1, nil)
+    else
+      return pm(channel, "0,1Could not find player #{player}", 1, nil)
+    end
+  end
+
+  def fremove_logic channel, player, admin
+    player_query  = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{player}' LIMIT 1")
+    if player_query.num_rows > 0
+      player_id = 0
+      while row = player_query.fetch_row do
+        player_id = row[0].to_i
+      end
+      addcheckq = $con.query("SELECT COUNT(`id`) FROM `current_players` WHERE `player_id` = '#{player_id}' AND `channel` = '#{channel}'")
+      count = 0
+      while row = addcheckq.fetch_row do
+        count = row[0].to_i
+      end
+      if count > 0
+        $con.query("DELETE FROM `current_players` WHERE `player_id` = '#{player_id}' AND `channel` = '#{channel}'")
+        pm(channel, "0,1#{admin} force removed #{player} from the pug", 1, nil)
+        get_list channel
+      else
+        pm(channel, "0,1#{player} is not currently added to the pug", 1, nil)
+      end
+    else
+      return pm(channel, "0,1Could not find player #{player}", 1, nil)
+    end
+  end
+
   def authorize_player channel, player
     restricted_nick = $con.escape_string(player)
     player_id_query = $con.query("SELECT `player_id` FROM `irc_players` WHERE `nick` = '#{restricted_nick}' LIMIT 1")

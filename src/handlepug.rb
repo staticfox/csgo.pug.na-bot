@@ -50,14 +50,16 @@ class Pug
   match /pick ([\S]+)/i, method: :command_pick
 
   # Debug commands
-  match /debug ([\S]+)/i, method: :command_debug
-  match /wipetables/i, method: :command_wipe
+  match /debug ([\S]+)/i, method: :admin_debug
+  match /wipetables/i, method: :admin_wipe
 
   # Admin commands
-  match /authorize ([\S]+)/i, method: :command_authorize
-  match /restrict ([\S]+) ([\S]+)(?: (.+))?/i, method: :command_restrict
-  match /crestrict ([\S]+) ([\S]+)(?: (.+))?/i, method: :command_crestrict
-  match /quit/i, method: :command_quit
+  match /authorize ([\S]+)/i, method: :admin_authorize
+  match /crestrict ([\S]+) ([\S]+)(?: (.+))?/i, method: :admin_crestrict
+  match /fadd ([\S]+)(?: (.+))?/i, method: :admin_fadd
+  match /fremove ([\S]+)/i, method: :admin_fremove
+  match /restrict ([\S]+) ([\S]+)(?: (.+))?/i, method: :admin_restrict
+  match /quit/i, method: :admin_quit
 
   # Channel ticks
   def event_channel m
@@ -188,14 +190,14 @@ class Pug
     ping_mysql
   end
 
-  def command_authorize m, p_restricted
+  def admin_authorize m, p_restricted
     channel = escape m.channel.to_s
     return m.reply "0,1You must be a channel op to use this command." unless m.channel.opped? m.user
     authorize_player channel, p_restricted
   end
 
-  def command_restrict m, p_restricted, time, message
-    restrictor = escape m.user.nick
+  def admin_restrict m, p_restricted, time, message
+    restrictor = escape m.user.nick.to_s
     restrictor_id = get_uid m
     channel = escape m.channel.to_s
     return m.reply "0,1You must be a channel op to use this command." unless m.channel.opped? m.user
@@ -207,8 +209,8 @@ class Pug
     restrict_player restrictor, restrictor_id, channel, p_restricted, time, message, 0
   end
 
-  def command_crestrict m, p_restricted, time, message
-    restrictor = escape m.user.nick
+  def admin_crestrict m, p_restricted, time, message
+    restrictor = escape m.user.nick.to_s
     restrictor_id = get_uid m
     channel = escape m.channel.to_s
     return m.reply "0,1You must be a channel op to use this command." unless m.channel.opped? m.user
@@ -225,8 +227,24 @@ class Pug
     prune_restrictions
   end
 
+  def admin_fadd m, p_fadded, captain
+    return m.reply "0,1You must be a channel op to use this command." unless m.channel.opped? m.user
+    player = escape p_fadded.to_s
+    channel = escape m.channel.to_s
+    admin = escape m.user.nick.to_s
+    fadd_logic channel, player, captain, admin #logic/pug
+  end
+
+  def admin_fremove m, p_fremoved
+    return m.reply "0,1You must be a channel op to use this command." unless m.channel.opped? m.user
+    player = escape p_fremoved.to_s
+    channel = escape m.channel.to_s
+    admin = escape m.user.nick.to_s
+    fremove_logic channel, player, admin
+  end
+
   # Debugging purposes, this will screw up your DB
-  def command_debug m, num
+  def admin_debug m, num
     return m.reply "0,1Debugging mode must be enabled." unless Constants.const['bot']['debug'].to_i == 1
     return m.reply "0,1You must be a channel op to use this command." unless m.channel.opped? m.user
     channel = escape m.channel.to_s
@@ -234,7 +252,7 @@ class Pug
   end
 
   # Kill the bot
-  def command_quit m
+  def admin_quit m
     return m.reply "0,1You must be a channel op to use this command." unless m.channel.opped? m.user
     quit_bot #logic/pug
   end

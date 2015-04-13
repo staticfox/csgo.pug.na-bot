@@ -16,3 +16,9 @@ Commands:
 !stv
 
 Rework database, possibly use activerecord
+
+Make a decision on wether or not to keep specifying channels for queries (half the code is split)
+
+Localize colors
+
+Add in a colorless mode
