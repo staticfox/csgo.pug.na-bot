@@ -246,7 +246,7 @@ module PugLogic
       else
 
         # Find the UID of our target
-        pick_id = pick
+        pick_id = playerid_by_nick pick
         if pick_id != 0
 
           is_added = $con.query("SELECT `player_id`,`captain` FROM `teams` WHERE `player_id` = '#{pick_id}' AND `channel` = '#{channel}'")
