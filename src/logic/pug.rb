@@ -115,34 +115,26 @@ module PugLogic
     if theirplayer
       theirid = playerid_by_nick theirplayer
       if theirid != 0
-        has_stats = $con.query("SELECT `times_played`,`times_captained` FROM `player_stats` WHERE `player_id` = '#{theirid}'")
-        if has_stats.num_rows > 0
-          total = captain = percentage = 0
-          while row = has_stats.fetch_row do
-            total = row[0].to_i
-            captain = row[1].to_i
-          end
-          percentage = (((captain.to_f/total.to_f))*100)
-          return pm(channel, "0,1 #{theirplayer} has played #{total} game(s) and has captained #{captain} time(s). (#{percentage.round(2)}% captain ratio)", 1, nil)
-        else
-          return pm(channel, "0,1 #{theirplayer} has not played any games.", 1, nil)
-        end
+        searchid = theirid
+        searchnick = theirplayer
       else
-        return pm(channel, "0,1 Could not find a player named #{theirplayer}.", 1, nil)
+        return pm(channel, "0,1Could not find a player named #{theirplayer}.", 1, nil)
       end
     else
-      find_stats = $con.query("SELECT `times_played`,`times_captained` FROM `player_stats` WHERE `player_id` = '#{ouruid}'")
-      if find_stats.num_rows > 0
-        total = captain = percentage = 0
-        while row = find_stats.fetch_row do
-          total = row[0].to_i
-          captain = row[1].to_i
-        end
-        percentage = (((captain.to_f/total.to_f))*100)
-        return pm(channel, "0,1 #{ournick} has played #{total} game(s) and has captained #{captain} time(s). (#{percentage.round(2)}% captain ratio)", 1, nil)
-      else
-        return pm(channel, "0,1 #{nournickick} has not played any games.", 1, nil)
+      searchid = ouruid
+      searchnick = ournick
+    end
+    find_stats = $con.query("SELECT `times_played`,`times_captained` FROM `player_stats` WHERE `player_id` = '#{searchid}'")
+    if find_stats.num_rows > 0
+      total = captain = percentage = 0
+      while row = find_stats.fetch_row do
+        total = row[0].to_i
+        captain = row[1].to_i
       end
+      percentage = (((captain.to_f/total.to_f))*100)
+      return pm(channel, "0,1#{searchnick} has played #{total} game(s) and has captained #{captain} time(s). (#{percentage.round(2)}% captain ratio)", 1, nil)
+    else
+      return pm(channel, "0,1#{searchnick} has not played any games.", 1, nil)
     end
   end
 
