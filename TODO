@@ -1,7 +1,5 @@
 TODO
 Block users trying to add/remove that are restricted
-Add in timers for pruning old restrictions
-Add !why for restricted users (!why <nick> for admins, !why for users)
 Use notices for drafts
 !picks to show current teams
 Ask someone about logs
