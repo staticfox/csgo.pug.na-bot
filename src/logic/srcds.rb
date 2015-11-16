@@ -253,7 +253,7 @@ module SRCDS
       find_not_full_server channel, nil, nil, nil
     elsif @servers.empty?
       pm(channel, "0,1All servers appear to be down or in use. Please contact a channel operator. In the mean time, I will assign a random server after drafts then you can figure it out from there", 1, nil)
-      return nil
+      return
     else
       server_ip = IPAddr.new(@current_server['ip'])
       server = SourceServer.new(server_ip, @current_server['port'].to_i)
