@@ -29,7 +29,7 @@ module IRCHandler
     end
   end
 
-  def nick_change(oldnick, newnick)
+  def nick_change oldnick, newnick
     # Since we use player IDs, we only need to change 1 field :]
     $con.query("UPDATE `irc_players` SET `nick` = '#{newnick}' WHERE `nick` = '#{oldnick}'")
   end
